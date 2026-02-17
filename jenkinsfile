@@ -1,54 +1,105 @@
+// pipeline {
+//     agent any
+//     triggers { 
+//       githubPush() 
+//    }
+//     environment {
+//         DOCKER_IMAGE_NAME = 'calculator'
+//         GITHUB_REPO_URL = 'https://github.com/dikshax86/MiniProject.git'
+//     }
+
+//     stages {
+//         stage('Checkout') {
+//             steps {
+//                 script {
+//                     // Checkout the code from the GitHub repository
+//                     git branch: 'main', url: "${GITHUB_REPO_URL}"
+//                 }
+//             }
+//         }
+
+//         stage('Build Docker Image') {
+//             steps {
+//                 script {
+//                     // Build Docker image
+//                     docker.build("${DOCKER_IMAGE_NAME}", '.')
+//                 }
+//             }
+//         }
+
+//         stage('Push Docker Images') {
+//             steps {
+//                 script{
+//                     docker.withRegistry('', 'DockerHubCred') {
+//                     sh 'docker tag calculator iiitb/calculator:latest'
+//                     sh 'docker push iiitb/calculator'
+//                     }
+//                  }
+//             }
+//         }
+
+//    stage('Run Ansible Playbook') {
+//             steps {
+//                 script {
+//                     ansiblePlaybook(
+//                         playbook: 'deploy.yml',
+//                         inventory: 'inventory'
+//                      )
+//                 }
+//             }
+//         }
+
+//     }
+// }
+// //testing
+
+
 pipeline {
     agent any
-    triggers { 
-      githubPush() 
-   }
+
+    triggers {
+        githubPush()
+    }
+
     environment {
         DOCKER_IMAGE_NAME = 'calculator'
-        GITHUB_REPO_URL = 'https://github.com/dikshax86/MiniProject.git'
+        DOCKER_HUB_REPO = 'iiitb/calculator'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                script {
-                    // Checkout the code from the GitHub repository
-                    git branch: 'main', url: "${GITHUB_REPO_URL}"
-                }
+                checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    // Build Docker image
-                    docker.build("${DOCKER_IMAGE_NAME}", '.')
-                }
+                sh 'docker build -t calculator .'
             }
         }
 
         stage('Push Docker Images') {
             steps {
-                script{
-                    docker.withRegistry('', 'DockerHubCred') {
-                    sh 'docker tag calculator iiitb/calculator:latest'
-                    sh 'docker push iiitb/calculator'
-                    }
-                 }
-            }
-        }
-
-   stage('Run Ansible Playbook') {
-            steps {
-                script {
-                    ansiblePlaybook(
-                        playbook: 'deploy.yml',
-                        inventory: 'inventory'
-                     )
+                withCredentials([usernamePassword(
+                    credentialsId: 'DockerHubCred',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        docker login -u $DOCKER_USER -p $DOCKER_PASS
+                        docker tag calculator $DOCKER_HUB_REPO:latest
+                        docker push $DOCKER_HUB_REPO:latest
+                    '''
                 }
             }
         }
 
+        stage('Run Ansible Playbook') {
+            steps {
+                sh 'ansible-playbook -i inventory deploy.yml'
+            }
+        }
     }
 }
-//testing
