@@ -2,7 +2,7 @@
 [localhost]
 localhost ansible_python_interpreter=/usr/bin/python3 ansible_ssh_user=diksha ansible_ssh_pass=root@123
 
-
+#testing
 
 
 
