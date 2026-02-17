@@ -18,8 +18,14 @@
       service:
         name: docker
         state: started
-    - name: Running container
+        
+    - name: stop container
       shell: docker stop calculator
+      
+    - name: rm container
       shell: docker rm calculator
+     
+    - name: Running container
       shell: docker run -it -d --name calculator iiitb/calculator /bin/bash
+
 
