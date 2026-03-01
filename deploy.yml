@@ -21,9 +21,11 @@
         
     - name: stop container
       shell: docker stop calculator
+      ignore_errors: yes  
       
     - name: rm container
       shell: docker rm calculator
+      ignore_errors: yes
      
     - name: Running container
       shell: docker run -it -d --name calculator iiitb/calculator /bin/bash
