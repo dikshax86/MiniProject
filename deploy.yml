@@ -1,0 +1,27 @@
+---
+- name: Deploy Calculator App with Docker
+  hosts: webserver
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Pull the latest Docker image
+      community.docker.docker_image:
+        name: dknights/scientific-calculator
+        source: pull
+
+    - name: Stop and remove existing container (if any)
+      community.docker.docker_container:
+        name: scientific-calculator
+        state: absent
+
+    - name: Run new container
+      community.docker.docker_container:
+        name: scientific-calculator
+        image: dknights/scientific-calculator
+        state: started
+        restart_policy: always
+        interactive: true
+        
