@@ -23,18 +23,22 @@ public class App {
     public static double power(double x,double y){
         return Math.pow(x,y);
     }
+    public static double add(double x,double y){
+        return x+y;
+    }
 
     public static void main(String[] args){
 
         Scanner sc = new Scanner(System.in);
 
         while(true){
-
+            
             System.out.println("1. Square Root");
             System.out.println("2. Factorial");
             System.out.println("3. Natural Log");
             System.out.println("4. Power");
-            System.out.println("5. Exit");
+            System.out.println("5. Addition");
+            System.out.println("6. Exit");
 
             int ch = sc.nextInt();
 
@@ -61,6 +65,10 @@ public class App {
                     break;
 
                 case 5:
+                    System.out.println("Enter two numbers:");
+                    System.out.println(sc.nextDouble() + sc.nextDouble());
+                    break;  
+                case 6:
                     System.exit(0);
             }
         }
