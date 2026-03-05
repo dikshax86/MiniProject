@@ -47,8 +47,11 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', 'DockerHubCred') {
-                        sh "docker tag calculator dknights/calculator:latest"
-                        sh "docker push dknights/calculator"
+                        // sh "docker tag calculator dknights/calculator:latest"
+                        // sh "docker push dknights/calculator"
+
+                        sh 'docker tag scientific-calculator dknights/scientific-calculator:latest'
+                        sh 'docker push dknights/scientific-calculator:latest'
                     }
                 }
             }
