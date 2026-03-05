@@ -31,7 +31,7 @@ pipeline {
 
         stage('Verify JAR Existence') {
             steps {
-                sh 'ls -lh target/'   // Check if the JAR file is actually created
+                sh 'ls -lh target/'   
             }
         }
 
@@ -43,25 +43,24 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image to Docker Hub') {
+        stage('Upload Image to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('', 'docker-hub-credential') {
-                        sh "docker tag ${DOCKER_IMAGE_NAME} ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest"
-                        sh "docker push ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest"
+                    docker.withRegistry('', 'DockerHubCred') {
+                        sh "docker tag calculator dknights/calculator:latest"
+                        sh "docker push dknights/calculator"
                     }
                 }
             }
         }
 
-        stage('Deploy with Ansible') {
+        stage('Deploy using Ansible') {
             steps {
-                script {
-                    ansiblePlaybook(
-                        playbook: 'deploy.yml',
-                        inventory: 'inventory'
-                    )
-                }
+                // Execute ansible playbook
+                ansiblePlaybook(
+                    playbook: "deploy.yml",
+                    inventory: "inventory"
+                )
             }
         }
     }
