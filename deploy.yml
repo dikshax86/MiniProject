@@ -24,7 +24,7 @@
 #         state: started
 #         restart_policy: always
 #         interactive: true
-#testing
+
         
 - name: Deploy Calculator App with Docker
   hosts: webserver
