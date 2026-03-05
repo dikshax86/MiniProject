@@ -37,7 +37,7 @@ public class App {
             System.out.println("2. Factorial");
             System.out.println("3. Natural Log");
             System.out.println("4. Power");
-            System.out.println("5. Addition");
+            System.out.println("5. Subtraction");
             System.out.println("6. Exit");
 
             int ch = sc.nextInt();
@@ -66,7 +66,7 @@ public class App {
 
                 case 5:
                     System.out.println("Enter two numbers:");
-                    System.out.println(sc.nextDouble() + sc.nextDouble());
+                    System.out.println(subtract(sc.nextDouble(),sc.nextDouble()));
                     break;  
                 case 6:
                     System.exit(0);
