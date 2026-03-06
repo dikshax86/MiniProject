@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        githubPush()   // Trigger pipeline when GitHub webhook sends push event
+        githubPush()   
     }
 
     environment {
@@ -82,7 +82,7 @@ Build URL: ${env.BUILD_URL}
 Docker image pushed to DockerHub successfully.
 Application deployed using Ansible.
 """,
-                to: "diksha.gupta@iiitb.ac.in"
+                to: "dikshaguptax86@gmail.com"
             )
         }
 
@@ -97,7 +97,7 @@ Build URL: ${env.BUILD_URL}
 
 Please check Jenkins logs.
 """,
-                to: "diksha.gupta@iiitb.ac.in"
+                to: "dikshaguptax86@gmail.com"
             )
         }
     }

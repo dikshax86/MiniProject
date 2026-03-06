@@ -2,7 +2,7 @@ package com.calculator;
 
 import java.util.Scanner;
 
-public class App {
+public class App 
 
     public static double sqrt(double x){
         return Math.sqrt(x);
