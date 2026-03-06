@@ -70,9 +70,12 @@ Build URL: ${BUILD_URL}
                  subject: "FAILED: Scientific Calculator Pipeline",
                  body: """
 Pipeline failed.
-
+Docker Image: ${IMAGE_NAME}
+Build Number: ${BUILD_NUMBER}
+Job Name: ${JOB_NAME}
+Build URL: ${BUILD_URL}
 Check Jenkins console:
-${BUILD_URL}
+
 """
         }
     }
