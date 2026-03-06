@@ -1,16 +1,25 @@
 ---
-- name: Deploy Calculator App with Docker
-  hosts: webserver
+- name: Deploy Calculator
+  hosts: localhost
   become: true
 
   tasks:
 
-    - name: Pull latest Docker image
-      command: docker pull dknights/scientific-calculator
+    - name: Pull image
+      community.docker.docker_image:
+        name: dknights/scientific-calculator
+        source: pull
 
-    - name: Stop and remove existing container if running
-      command: docker rm -f scientific-calculator
-      ignore_errors: yes
+    - name: Remove old container if exists
+      community.docker.docker_container:
+        name: scientific-calculator
+        state: absent
+        force_kill: true
 
-    - name: Run new container
-      command: docker run -dit --name scientific-calculator dknights/scientific-calculator
+    - name: Run container
+      community.docker.docker_container:
+        name: scientific-calculator
+        image: dknights/scientific-calculator
+        state: started
+        recreate: true
+        restart_policy: always

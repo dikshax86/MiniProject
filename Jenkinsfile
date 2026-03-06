@@ -1,5 +1,10 @@
 pipeline {
     agent any
+
+    triggers {
+        githubPush()   // Trigger pipeline when GitHub webhook sends push event
+    }
+
     environment {
         DOCKER_IMAGE_NAME = 'scientific-calculator'
         GITHUB_REPO_URL = 'https://github.com/dikshax86/MiniProject.git'
@@ -7,13 +12,12 @@ pipeline {
     }
 
     stages {
+
         stage('Clone Git') {
             steps {
-                script {
-                    git branch: 'master',
-                        credentialsId: 'github_credentials',
-                        url: "${GITHUB_REPO_URL}"
-                }
+                git branch: 'master',
+                    credentialsId: 'github_credentials',
+                    url: "${GITHUB_REPO_URL}"
             }
         }
 
@@ -31,7 +35,7 @@ pipeline {
 
         stage('Verify JAR Existence') {
             steps {
-                sh 'ls -lh target/'   
+                sh 'ls -lh target/'
             }
         }
 
@@ -47,9 +51,6 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', 'DockerHubCred') {
-                        // sh "docker tag calculator dknights/calculator:latest"
-                        // sh "docker push dknights/calculator"
-
                         sh 'docker tag scientific-calculator dknights/scientific-calculator:latest'
                         sh 'docker push dknights/scientific-calculator:latest'
                     }
@@ -59,12 +60,45 @@ pipeline {
 
         stage('Deploy using Ansible') {
             steps {
-                // Execute ansible playbook
                 ansiblePlaybook(
                     playbook: "deploy.yml",
                     inventory: "inventory"
                 )
             }
+        }
+    }
+
+    post {
+
+        success {
+            emailext(
+                subject: "SUCCESS: Jenkins Build - ${env.JOB_NAME}",
+                body: """Build completed successfully.
+
+Job Name: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Build URL: ${env.BUILD_URL}
+
+Docker image pushed to DockerHub successfully.
+Application deployed using Ansible.
+""",
+                to: "diksha.gupta@iiitb.ac.in"
+            )
+        }
+
+        failure {
+            emailext(
+                subject: "FAILED: Jenkins Build - ${env.JOB_NAME}",
+                body: """Build failed.
+
+Job Name: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Build URL: ${env.BUILD_URL}
+
+Please check Jenkins logs.
+""",
+                to: "diksha.gupta@iiitb.ac.in"
+            )
         }
     }
 }
