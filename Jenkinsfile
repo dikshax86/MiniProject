@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()     // Trigger build when GitHub push happens
+    }
+
     environment {
         IMAGE_NAME = "dknights/scientific-calculator:latest"
     }
