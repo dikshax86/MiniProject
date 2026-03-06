@@ -61,28 +61,35 @@ pipeline {
     }
 
     post {
-        success {
-            mail to: 'dikshaguptax86@gmail.com',
-                 subject: "SUCCESS: Scientific Calculator Pipeline",
-                 body: """
-Pipeline executed successfully.
 
-Docker Image: ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest
-Build Number: ${BUILD_NUMBER}
-Job Name: ${JOB_NAME}
-Build URL: ${BUILD_URL}
-"""
+        success {
+            emailext(
+                subject: "SUCCESS: Jenkins Build ${env.JOB_NAME}",
+                body: """Build completed successfully.
+
+Job Name: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Build URL: ${env.BUILD_URL}
+
+Docker image pushed and application deployed successfully.
+""",
+                to: "${EMAIL_RECIPIENT}"
+            )
         }
 
         failure {
-            mail to: 'dikshaguptax86@gmail.com',
-                 subject: "FAILED: Scientific Calculator Pipeline",
-                 body: """
-Pipeline failed.
+            emailext(
+                subject: "FAILED: Jenkins Build ${env.JOB_NAME}",
+                body: """Build failed.
 
-Check Jenkins console:
-${BUILD_URL}
-"""
+Job Name: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Build URL: ${env.BUILD_URL}
+
+Check Jenkins console logs for details.
+""",
+                to: "${EMAIL_RECIPIENT}"
+            )
         }
     }
 }
