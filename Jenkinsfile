@@ -6,47 +6,56 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "dknights/scientific-calculator:latest"
+        DOCKER_IMAGE_NAME = 'scientific-calculator'
+        DOCKER_HUB_USERNAME = 'dknights'
+        EMAIL_RECIPIENT = 'dikshaguptax86@gmail.com'
     }
 
     stages {
 
-        stage('Build with Maven') {
+        stage('Checkout Code') {
+            steps {
+                git url: 'https://github.com/dikshax86/MiniProject.git', branch: 'master'
+            }
+        }
+
+        stage('Build Maven Project') {
             steps {
                 sh 'mvn clean package'
             }
         }
 
-        stage('Run Tests') {
+        stage('Verify JAR File') {
             steps {
-                sh 'mvn test'
+                sh 'ls -lh target/'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
-            }
-        }
-
-        stage('Push to DockerHub') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'DockerHubCred',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        docker push $IMAGE_NAME
-                    '''
+                script {
+                    docker.build("${DOCKER_IMAGE_NAME}")
                 }
             }
         }
 
-        stage('Deploy with Ansible') {
+        stage('Push Docker Image to DockerHub') {
             steps {
-                sh 'ansible-playbook deploy.yml -i inventory'
+                script {
+                    docker.withRegistry('', 'DockerHubCred') {
+                        sh "docker tag ${DOCKER_IMAGE_NAME} ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest"
+                        sh "docker push ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy using Ansible') {
+            steps {
+                ansiblePlaybook(
+                    playbook: 'deploy.yml',
+                    inventory: 'inventory'
+                )
             }
         }
     }
@@ -58,7 +67,7 @@ pipeline {
                  body: """
 Pipeline executed successfully.
 
-Docker Image: ${IMAGE_NAME}
+Docker Image: ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest
 Build Number: ${BUILD_NUMBER}
 Job Name: ${JOB_NAME}
 Build URL: ${BUILD_URL}
