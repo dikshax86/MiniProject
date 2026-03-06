@@ -5,7 +5,7 @@ pipeline {
         githubPush()     
     }
 
-    environment 
+    environment {
         IMAGE_NAME = "dknights/scientific-calculator:latest"
     }
 
