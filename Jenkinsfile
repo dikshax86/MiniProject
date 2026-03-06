@@ -1,95 +1,75 @@
 pipeline {
     agent any
 
-    triggers {
-        githubPush()     
-    }
-
     environment {
-        DOCKER_IMAGE_NAME = 'scientific-calculator'
-        DOCKER_HUB_USERNAME = 'dknights'
-        EMAIL_RECIPIENT = 'dikshaguptax86@gmail.com'
+        IMAGE_NAME = "dknights/scientific-calculator:latest"
     }
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                git url: 'https://github.com/dikshax86/MiniProject.git', branch: 'master'
-            }
-        }
-
-        stage('Build Maven Project') {
+        stage('Build with Maven') {
             steps {
                 sh 'mvn clean package'
             }
         }
 
-        stage('Verify JAR File') {
+        stage('Run Tests') {
             steps {
-                sh 'ls -lh target/'
+                sh 'mvn test'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE_NAME}")
+                sh 'docker build -t $IMAGE_NAME .'
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'DockerHubCred',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push $IMAGE_NAME
+                    '''
                 }
             }
         }
 
-        stage('Push Docker Image to DockerHub') {
+        stage('Deploy with Ansible') {
             steps {
-                script {
-                    docker.withRegistry('', 'DockerHubCred') {
-                        sh "docker tag ${DOCKER_IMAGE_NAME} ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest"
-                        sh "docker push ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest"
-                    }
-                }
-            }
-        }
-
-        stage('Deploy using Ansible') {
-            steps {
-                ansiblePlaybook(
-                    playbook: 'deploy.yml',
-                    inventory: 'inventory'
-                )
+                sh 'ansible-playbook deploy.yml -i inventory'
             }
         }
     }
 
     post {
-
         success {
-            emailext(
-                subject: "SUCCESS: Jenkins Build ${env.JOB_NAME}",
-                body: """Build completed successfully.
+            mail to: 'dikshaguptax86@gmail.com',
+                 subject: "SUCCESS: Scientific Calculator Pipeline",
+                 body: """
+Pipeline executed successfully.
 
-Job Name: ${env.JOB_NAME}
-Build Number: ${env.BUILD_NUMBER}
-Build URL: ${env.BUILD_URL}
-
-Docker image pushed and application deployed successfully.
-""",
-                to: "${EMAIL_RECIPIENT}"
-            )
+Docker Image: ${IMAGE_NAME}
+Build Number: ${BUILD_NUMBER}
+Job Name: ${JOB_NAME}
+Build URL: ${BUILD_URL}
+"""
         }
 
         failure {
-            emailext(
-                subject: "FAILED: Jenkins Build ${env.JOB_NAME}",
-                body: """Build failed.
+            mail to: 'dikshaguptax86@gmail.com',
+                 subject: "FAILED: Scientific Calculator Pipeline",
+                 body: """
+Pipeline failed.
 
-Job Name: ${env.JOB_NAME}
-Build Number: ${env.BUILD_NUMBER}
-Build URL: ${env.BUILD_URL}
-
-Check Jenkins console logs for details.
-""",
-                to: "${EMAIL_RECIPIENT}"
-            )
+Check Jenkins console:
+${BUILD_URL}
+"""
         }
     }
 }
