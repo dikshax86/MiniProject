@@ -1,6 +1,8 @@
 ---
 - name: Deploy Calculator App with Docker
   hosts: webserver
+  become: true
+
   tasks:
 
     - name: Pull latest Docker image
