@@ -38,7 +38,7 @@ public class App {
             System.out.println("2. Factorial");
             System.out.println("3. Natural Log");
             System.out.println("4. Power");
-            System.out.println("5. Devide");
+            System.out.println("5. Devide(new)");
             System.out.println("6. Exit");
 
             int ch = sc.nextInt();
