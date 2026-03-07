@@ -3,7 +3,7 @@ package com.calculator;
 import java.util.Scanner;
 
 
-public class App 
+public class App {
 
     public static double sqrt(double x){
         return Math.sqrt(x);
@@ -24,8 +24,8 @@ public class App
     public static double power(double x,double y){
         return Math.pow(x,y);
     }
-    public static double subtract(double x,double y){
-        return x-y;
+    public static double devide(double x,double y){
+        return x/y;
     }
 
     public static void main(String[] args){
@@ -38,7 +38,7 @@ public class App
             System.out.println("2. Factorial");
             System.out.println("3. Natural Log");
             System.out.println("4. Power");
-            System.out.println("5. Subtraction");
+            System.out.println("5. Devide");
             System.out.println("6. Exit");
 
             int ch = sc.nextInt();
@@ -67,7 +67,7 @@ public class App
 
                 case 5:
                     System.out.println("Enter two numbers:");
-                    System.out.println(subtract(sc.nextDouble(),sc.nextDouble()));
+                    System.out.println(devide(sc.nextDouble(),sc.nextDouble()));
                     break;  
                 case 6:
                     System.exit(0);
