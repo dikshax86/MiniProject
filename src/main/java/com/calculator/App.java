@@ -43,7 +43,7 @@ public class App {
 
             int ch = sc.nextInt();
 
-            switch(ch)
+            switch(ch){
 
                 case 1:
                     System.out.println("Enter number:");
